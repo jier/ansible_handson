@@ -1,0 +1,178 @@
+- name: Install Geany
+  hosts: debian_hosts
+  become: true
+  tasks:
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - software-properties-common
+        - apt-transport-https
+        - gnupg
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Install Geany
+      ansible.builtin.apt:
+        name: geany
+        state: present
+
+    - name: Ensure Geany is installed for profile1
+      become: true
+      become_user: profile1
+      ansible.builtin.shell: |
+        geany --version
+      changed_when: false
+
+    - name: Ensure Geany is installed for profile2
+      become: true
+      become_user: profile2
+      ansible.builtin.shell: |
+        geany --version
+      changed_when: false
+
+# - name: Install Atom # HTTP: 402
+#   hosts: debian_hosts
+#   become: true
+#   tasks:
+#     - name: Install dependencies
+#       ansible.builtin.apt:
+#         name: "{{ item }}"
+#         state: present
+#       loop:
+#         - software-properties-common
+#         - apt-transport-https
+#         - gnupg
+
+#     - name: Add Atom GPG key to trusted keyring
+#       ansible.builtin.get_url:
+#         url: https://packagecloud.io/AtomEditor/atom/gpgkey
+#         dest: /etc/apt/trusted.gpg.d/atom.asc
+#         mode: '0644'
+
+#     - name: Add Atom repository
+#       ansible.builtin.apt_repository:
+#         repo: 'deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main'
+#         state: present
+#         filename: 'atom'
+
+#     - name: Update apt cache
+#       ansible.builtin.apt:
+#         update_cache: true
+
+#     - name: Install Atom
+#       ansible.builtin.apt:
+#         name: atom
+#         state: present
+
+#     - name: Ensure Atom is installed for profile1
+#       become: true
+#       become_user: profile1
+#       ansible.builtin.shell: |
+#         apm install atom-python-run
+#       changed_when: false
+
+#     - name: Ensure Atom is installed for profile2
+#       become: true
+#       become_user: profile2
+#       ansible.builtin.shell: |
+#         apm install atom-python-run
+#       changed_when: false
+
+# - name: Install VSCodium # secure to update and not working
+#   hosts: debian_hosts
+#   become: true
+#   tasks:
+#     - name: Install dependencies
+#       ansible.builtin.apt:
+#         name: "{{ item }}"
+#         state: present
+#       loop:
+#         - software-properties-common
+#         - apt-transport-https
+#         - gnupg
+
+#     - name: Add VSCodium GPG key to trusted keyring
+#       ansible.builtin.get_url:
+#         url: https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg
+#         dest: /etc/apt/trusted.gpg.d/vscodium.asc
+#         mode: '0644'
+
+#     - name: Add VSCodium repository
+#       ansible.builtin.apt_repository:
+#         repo: 'deb [arch=amd64] https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/repos/debs/ vscodium main'
+#         state: present
+#         filename: 'vscodium'
+
+#     - name: Update apt cache
+#       ansible.builtin.apt:
+#         update_cache: true
+
+#     - name: Install VSCodium
+#       ansible.builtin.apt:
+#         name: codium
+#         state: present
+
+#     - name: Ensure VSCodium is installed for profile1
+#       become: true
+#       become_user: profile1
+#       ansible.builtin.shell: |
+#         codium --install-extension ms-python.python
+#       changed_when: false
+
+#     - name: Ensure VSCodium is installed for profile2
+#       become: true
+#       become_user: profile2
+#       ansible.builtin.shell: |
+#         codium --install-extension ms-python.python
+#       changed_when: false
+
+# - name: Install VSCode #failing
+#   hosts: debian_hosts
+#   become: true
+#   tasks:
+#     - name: Install dependencies
+#       ansible.builtin.apt:
+#         name: "{{ item }}"
+#         state: present
+#       loop:
+#         - software-properties-common
+#         - apt-transport-https
+
+#     - name: Add Microsoft GPG key to trusted keyring
+#       ansible.builtin.get_url:
+#         url: https://packages.microsoft.com/keys/microsoft.asc
+#         dest: /etc/apt/trusted.gpg.d/microsoft.asc
+#         mode: '0644'
+
+#     - name: Add VSCode repository
+#       ansible.builtin.apt_repository:
+#         repo: 'deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main'
+#         state: present
+#         filename: 'vscode'
+
+#     - name: Update apt cache
+#       ansible.builtin.apt:
+#         update_cache: true
+
+#     - name: Install VSCode
+#       ansible.builtin.apt:
+#         name: code
+#         state: present
+
+#     - name: Ensure VSCode is installed for profile1
+#       become: true
+#       become_user: profile1
+#       ansible.builtin.shell: |
+#         code --install-extension ms-python.python
+#       changed_when: false
+
+#     - name: Ensure VSCode is installed for profile2
+#       become: true
+#       become_user: profile2
+#       ansible.builtin.shell: |
+#         code --install-extension ms-python.python
+#       changed_when: false

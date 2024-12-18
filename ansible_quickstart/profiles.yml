@@ -1,0 +1,22 @@
+- name: Create user profiles
+  hosts: debian_hosts
+  become: true
+  tasks:
+    - name: Ensure the 'sudo' package is installed
+      ansible.builtin.apt:
+        name: sudo
+        state: present
+
+    - name: Create user profile1
+      ansible.builtin.user:
+        name: profile1
+        password: "{{ 'password1' | password_hash('sha512') }}"
+        shell: /bin/bash
+        groups: sudo
+
+    - name: Create user profile2
+      ansible.builtin.user:
+        name: profile2
+        password: "{{ 'password2' | password_hash('sha512') }}"
+        shell: /bin/bash
+        groups: sudo

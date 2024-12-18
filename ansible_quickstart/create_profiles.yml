@@ -1,0 +1,102 @@
+---
+# Original case study but breaking on installing vscode
+- name: Create profiles and install VSCode
+  hosts: debian_hosts
+  become: true
+  tasks:
+    - name: Ensure the 'sudo' package is installed
+      ansible.builtin.apt:
+        name: sudo
+        state: present
+
+    #  DEBUG purpose
+    # - name: Debug Python and passlib installation
+    #   ansible.builtin.command: python3 -m pip show passlib
+    #   register: passlib_info
+    #   ignore_errors: true
+    #   changed_when: false
+
+    # - name: Show passlib installation info
+    #   ansible.builtin.debug:
+    #     var: passlib_info
+
+    # - name: Ensure Python3 is the default interpreter
+    #   ansible.builtin.file:
+    #     src: /usr/bin/python3
+    #     dest: /usr/bin/python
+    #     state: link
+    #   changed_when: false
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - software-properties-common
+        - apt-transport-https
+
+    # Issue with old way of adding key rings.
+    # See: https://askubuntu.com/questions/1398344/apt-key-deprecation-warning-when-updating-system-key-is-stored-in-legacy-trust
+    # - name: Remove Microsoft GPG key from legacy keyring
+    #   ansible.builtin.apt_key:
+    #     id: 'BC528686B50D79E339D3721CEB3E94ADBE1229CF'
+    #     state: absent
+
+    # - name: Add Microsoft GPG key to new keyring # Does not work properly or something, stupig.
+    #   ansible.builtin.apt_key:
+    #     url: https://packages.microsoft.com/keys/microsoft.asc
+    #     state: present
+    #     keyring: /usr/share/keyrings/microsoft-archive-keyring.gpg
+
+    - name: Add Microsoft GPG key to trusted keyring
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        dest: /etc/apt/trusted.gpg.d/microsoft.asc
+        mode: '0644'
+
+    - name: Add VSCode repository
+      ansible.builtin.apt_repository:
+        repo: 'deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main'
+        state: present
+        filename: 'vscode'
+
+    # - name: Clean apt cache # Not necessary?
+    #   ansible.builtin.apt:
+    #     update_cache: true
+    #     cache_valid_time: 3600
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Install VSCode
+      ansible.builtin.apt:
+        name: code
+        state: present
+
+    - name: Create user profile1
+      ansible.builtin.user:
+        name: profile1
+        password: "{{ 'password1' | password_hash('sha512') }}"
+        shell: /bin/bash
+        groups: sudo
+
+    - name: Create user profile2
+      ansible.builtin.user:
+        name: profile2
+        password: "{{ 'password2' | password_hash('sha512') }}"
+        shell: /bin/bash
+        groups: sudo
+
+    - name: Ensure VSCode is installed for profile1
+      become: true
+      become_user: profile1
+      ansible.builtin.shell: |
+        code --install-extension ms-python.python
+      changed_when: false
+
+    - name: Ensure VSCode is installed for profile2
+      become: true
+      become_user: profile2
+      ansible.builtin.shell: |
+        code --install-extension ms-python.python
+      changed_when: false

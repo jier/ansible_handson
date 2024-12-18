@@ -1,0 +1,112 @@
+- name: Install Obsidian, LibreOffice, and Signal
+  hosts: debian_hosts
+  become: true
+  tasks:
+    - name: Create /tmp/ansible directory
+      ansible.builtin.file:
+        path: /tmp/ansible
+        state: directory
+        mode: '1777'
+
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - software-properties-common
+        - apt-transport-https
+        - gnupg
+        - wget
+
+    # - name: Remove malformed Obsidian repository file if it exists # Obsidian creating malformed entry in source list
+    #   ansible.builtin.file:
+    #     path: /etc/apt/sources.list.d/obsidian.list
+    #     state: absent
+    # - name: Add Obsidian GPG key
+    #   ansible.builtin.get_url:
+    #     url: https://obsidian.md/obsidian.asc
+    #     dest: /etc/apt/trusted.gpg.d/obsidian.asc
+    #     mode: '0644'
+
+    # - name: Add Obsidian repository
+    #   ansible.builtin.apt_repository:
+    #     repo: 'deb [arch=amd64] https://downloads.obsidian.md/ apt/ stable'
+    #     state: present
+    #     filename: 'obsidian'
+
+    # - name: Add Signal GPG key
+    #   ansible.builtin.get_url:
+    #     url: https://updates.signal.org/desktop/apt/keys.asc
+    #     dest: /usr/share/keyrings/signal-desktop-keyring.gpg
+    #     mode: '0644'
+
+    # - name: Add Signal repository # signal repo and key not working
+    #   ansible.builtin.apt_repository:
+    #     repo: 'deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop-keyring.gpg] https://updates.signal.org/desktop/apt xenial main'
+    #     state: present
+    #     filename: 'signal-xenial'
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    # - name: Install Obsidian
+    #   ansible.builtin.apt:
+    #     name: obsidian
+    #     state: present
+
+    - name: Install LibreOffice
+      ansible.builtin.apt:
+        name: libreoffice
+        state: present
+
+    # - name: Install Signal
+    #   ansible.builtin.apt:
+    #     name: signal-desktop
+    #     state: present
+
+    # - name: Ensure Obsidian is installed for profile1
+    #   become: true
+    #   become_user: profile1
+    #   ansible.builtin.command:
+    #     cmd: obsidian --version
+    #   changed_when: false
+
+    # - name: Ensure Obsidian is installed for profile2
+    #   become: true
+    #   become_user: profile2
+    #   ansible.builtin.command:
+    #     cmd: obsidian --version
+    #   changed_when: false
+
+    - name: Ensure LibreOffice is installed for profile1
+      become: true
+      ansible.builtin.command:
+        cmd: libreoffice --version
+      register: result_profile1
+      failed_when: result_profile1.rc != 0
+      # become_user: profile1 # not able to enable to user, chmod error
+      changed_when: false
+
+    - name: Ensure LibreOffice is installed for profile2
+      become: true
+      ansible.builtin.command:
+        cmd: libreoffice --version
+      register: result_profile2
+      failed_when: result_profile2.rc != 0
+      # become_user: profile2
+      changed_when: false
+
+    # - name: Ensure Signal is installed for profile1
+    #   become: true
+    #   become_user: profile1
+    #   ansible.builtin.command:
+    #     cmd: signal-desktop --version
+    #   changed_when: false
+
+    # - name: Ensure Signal is installed for profile2
+    #   become: true
+    #   become_user: profile2
+    #   ansible.builtin.command:
+    #     cmd: signal-desktop --version
+    #   changed_when: false

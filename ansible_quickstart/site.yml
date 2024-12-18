@@ -1,0 +1,8 @@
+- name: Create user profiles
+  import_playbook: profiles.yml
+
+- name: Install and configure Code Editor
+  import_playbook: code_editor.yml
+
+- name: Install remaining developping software
+  import_playbook: software_install.yml
